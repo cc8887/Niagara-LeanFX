@@ -1,0 +1,4 @@
+interface:
+  display_name: "Niagara 特效制作与拆解"
+  short_description: "从玩法需求设计 Niagara 特效，或从 Fab 资产追溯实现并验证画面"
+  default_prompt: "用 $niagara-vfx-production 分析这个特效的需求、分层和实现，并给出可验证的 Niagara 制作方案。"
