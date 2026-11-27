@@ -1,0 +1,30 @@
+{
+  "schema_version": "0.5",
+  "kind": "niagara_text_export",
+  "origin": "illustrative",
+  "scope": "asset",
+  "source_asset": "Example/FX/NS_SampleTrail",
+  "engine_version": null,
+  "document": {
+    "path": "trail.niagara.dsl",
+    "sha256": "538e7f9d1d34e7598c88f1e86a4d3b45964efb78ed278b788682d6b6cc195e4c",
+    "format": "niagara2dsl-0.1"
+  },
+  "materials": [
+    {
+      "asset_path": "Example/FX/MI_SampleTrail",
+      "used_by": [
+        "$ribbon"
+      ],
+      "status": "reference_only",
+      "documents": []
+    }
+  ],
+  "coverage": {
+    "status": "illustrative",
+    "limitations": [
+      "Handwritten stack excerpt using relative identifiers."
+    ]
+  },
+  "diagnostics": []
+}

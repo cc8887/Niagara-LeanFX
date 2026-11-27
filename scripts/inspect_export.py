@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 import sys
 
+import export_reader as dsl
+
 
 def fields(dsl, form, names):
     attrs = dsl.attrs(form)
@@ -82,27 +84,34 @@ def emitter_index(dsl, emitter, queries):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("export", type=Path, help="Directory containing the Niagara2DSL manifest.json")
-    parser.add_argument("--project", type=Path, default=Path.cwd(), help="Project with the Niagara2DSL plugin")
     parser.add_argument("--input", action="append", default=[], help="Exact Niagara input name; repeat as needed")
     args = parser.parse_args()
-    plugin = args.project.resolve() / "Plugins/Niagara2DSL/Scripts"
-    if not (plugin / "verify_export.py").is_file():
-        parser.error("Pass the GASP58 root or another trusted project containing Plugins/Niagara2DSL via --project")
-    sys.path.insert(0, str(plugin))
-    import verify_export as dsl
 
     directory = args.export.resolve()
     queries = {name.casefold() for name in args.input}
     try:
-        manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8-sig"))
+        manifest = dsl.object_value(
+            json.loads((directory / "manifest.json").read_text(encoding="utf-8-sig")), "manifest"
+        )
+        if manifest.get("kind") != "niagara_text_export" or manifest.get("schema_version") not in ("0.4", "0.5"):
+            raise ValueError("Expected a Niagara text export manifest version 0.4 or 0.5")
+        source_asset = dsl.text_value(manifest.get("source_asset"), "manifest.source_asset")
         source, document = dsl.read_document(directory, manifest["document"])
         root, = dsl.parse(source)
-        if root.head != "niagara-dsl" or dsl.attrs(root).get(":source") != manifest["source_asset"]:
+        if root.head != "niagara-dsl" or dsl.attrs(root).get(":source") != source_asset:
             raise ValueError("Manifest and Niagara DSL source identity differ")
+        materials = dsl.list_value(manifest.get("materials", []), "materials")
+        material_documents = []
+        for material in materials:
+            material = dsl.object_value(material, "material")
+            for entry in dsl.list_value(material.get("documents", []), "material.documents"):
+                _, verified = dsl.read_document(directory, entry)
+                material_documents.append(verified)
         systems = dsl.children(root, "system")
         result = {
-            "asset": manifest["source_asset"], "engine": manifest.get("engine_version"),
-            "dsl_sha256": document["sha256"], "coverage": manifest.get("coverage", {}).get("status"),
+            "asset": source_asset, "engine": manifest.get("engine_version"), "origin": manifest.get("origin"),
+            "dsl_sha256": document["sha256"], "verified_material_documents": material_documents,
+            "coverage": dsl.object_value(manifest.get("coverage", {}), "coverage").get("status"),
             "diagnostic_count": len(manifest.get("diagnostics", [])),
             "scope": "Authored inputs in each stage; call order and runtime values require separate evidence.",
             "user_defaults": [], "system_stages": [], "emitters": [],

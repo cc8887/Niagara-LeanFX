@@ -23,13 +23,13 @@
       "op": "add-module",
       "emitter": "West",
       "script": "EmitterUpdateScript",
-      "asset": "/Niagara/Modules/Emitter/EmitterState.EmitterState"
+      "asset": "Niagara/Modules/Emitter/EmitterState.EmitterState"
     },
     {
       "op": "add-module",
       "emitter": "West",
       "script": "EmitterUpdateScript",
-      "asset": "/Niagara/Modules/Emitter/SpawnRate.SpawnRate"
+      "asset": "Niagara/Modules/Emitter/SpawnRate.SpawnRate"
     },
     {
       "op": "input",
@@ -91,25 +91,25 @@
       "op": "add-module",
       "emitter": "West",
       "script": "ParticleUpdateScript",
-      "asset": "/Niagara/Modules/Update/Lifetime/ParticleState.ParticleState"
+      "asset": "Niagara/Modules/Update/Lifetime/ParticleState.ParticleState"
     },
     {
       "op": "add-module",
       "emitter": "West",
       "script": "ParticleUpdateScript",
-      "asset": "/Niagara/Modules/Solvers/SolveForcesAndVelocity.SolveForcesAndVelocity"
+      "asset": "Niagara/Modules/Solvers/SolveForcesAndVelocity.SolveForcesAndVelocity"
     },
     {
       "op": "add-renderer",
       "emitter": "West",
-      "class": "/Script/Niagara.NiagaraSpriteRendererProperties"
+      "class": "Script/Niagara.NiagaraSpriteRendererProperties"
     },
     {
       "op": "renderer-properties",
       "emitter": "West",
       "renderer": 0,
       "properties": {
-        "Material": "/Niagara/DefaultAssets/DefaultSpriteMaterial.DefaultSpriteMaterial"
+        "Material": "Niagara/DefaultAssets/DefaultSpriteMaterial.DefaultSpriteMaterial"
       }
     },
     {
@@ -128,13 +128,13 @@
       "op": "add-module",
       "emitter": "East",
       "script": "EmitterUpdateScript",
-      "asset": "/Niagara/Modules/Emitter/EmitterState.EmitterState"
+      "asset": "Niagara/Modules/Emitter/EmitterState.EmitterState"
     },
     {
       "op": "add-module",
       "emitter": "East",
       "script": "EmitterUpdateScript",
-      "asset": "/Niagara/Modules/Emitter/SpawnRate.SpawnRate"
+      "asset": "Niagara/Modules/Emitter/SpawnRate.SpawnRate"
     },
     {
       "op": "input",
@@ -196,25 +196,25 @@
       "op": "add-module",
       "emitter": "East",
       "script": "ParticleUpdateScript",
-      "asset": "/Niagara/Modules/Update/Lifetime/ParticleState.ParticleState"
+      "asset": "Niagara/Modules/Update/Lifetime/ParticleState.ParticleState"
     },
     {
       "op": "add-module",
       "emitter": "East",
       "script": "ParticleUpdateScript",
-      "asset": "/Niagara/Modules/Solvers/SolveForcesAndVelocity.SolveForcesAndVelocity"
+      "asset": "Niagara/Modules/Solvers/SolveForcesAndVelocity.SolveForcesAndVelocity"
     },
     {
       "op": "add-renderer",
       "emitter": "East",
-      "class": "/Script/Niagara.NiagaraSpriteRendererProperties"
+      "class": "Script/Niagara.NiagaraSpriteRendererProperties"
     },
     {
       "op": "renderer-properties",
       "emitter": "East",
       "renderer": 0,
       "properties": {
-        "Material": "/Niagara/DefaultAssets/DefaultSpriteMaterial.DefaultSpriteMaterial"
+        "Material": "Niagara/DefaultAssets/DefaultSpriteMaterial.DefaultSpriteMaterial"
       }
     }
   ]
