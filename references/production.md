@@ -27,32 +27,24 @@
 2. 把 `User.*` 参数绑定到实际读取它的模块，在组件或关卡中分别用默认值和一个测试值确认受控。编译、保存、重新打开资产，核对启用的层、堆栈、Renderer 和材质。在测试关卡触发系统并保存对照帧。需要 Cook、平台验证或并发计数时按目标项目的运行环境验证。
 3. 用实际时间轴或固定帧率对照画面。需要速度、骨骼、深度、距离场的效果应提供对应输入，移动特效应使用会移动的宿主。检查亮暗背景、占屏尺寸和遮挡。区分渲染预热与实际模拟帧。GPU 粒子计数注明回读来源。末帧预期全黑时，用先前的可见帧以及回收时的计数确认资产曾绘制并自然消失。
 
-交付记录包括原始需求、资产或配方位置、UE 构建、驱动参数、帧号与帧率、相机及观察到的差异。无法启动引擎时仍可检查配方和现有证据，说明哪些阶段已有回执。
+交付记录包括原始需求、资产位置或编辑器复现步骤、UE 构建、驱动参数、帧号与帧率、相机及观察到的差异。无法启动引擎时，核对规格和已有证据，注明验证范围。使用项目已有自动化时，把同一份堆栈规格映射到工具接口，并以实际保存的资产和运行画面验收。
 
 ## 双束汇聚信标示例
 
-从两个本地空间 CPU Sprite 发射器开始。两侧在局部 X 轴的 −48 / +48 cm 发射，以 80 cm/s 向中线靠拢，同时以 120 cm/s 上升。寿命 0.6 s，终点在中央约 72 cm 高处。两个发射器的 Spawn Rate 共用 `User.EmissionRate`，默认各 15 粒/秒。宿主把它调到 0 后，现有粒子应在约 0.6 s 内消失。默认稳态估算为 2 × 15 × 0.6 = 18 粒，实际峰值和画面需在引擎内验证。
+新建一个 Niagara System，将生命周期设为持续循环。添加两个本地空间 CPU 发射器，让发射器沿用 System 的生命周期。创建 Float 类型的用户参数 `User.EmissionRate`，默认值设为 15，并把两个发射器在 Emitter Update 的 Spawn Rate 都绑定到它。只保留这一路生成逻辑。
 
-### 可选的 Niagara-UE-Lite 流程
+| Particle Spawn | 左束 | 右束 |
+|---|---:|---:|
+| 局部出生位置（cm） | (−48, 0, 0) | (48, 0, 0) |
+| 局部初速度（cm/s） | (80, 0, 120) | (−80, 0, 120) |
+| 寿命（s） | 0.6 | 0.6 |
+| Sprite 尺寸（cm） | 10 × 10 | 10 × 10 |
+| 线性 RGBA | (1, 0.22, 0.035, 1) | (1, 0.54, 0.08, 1) |
 
-若已安装匹配目标 UE 版本的 Niagara-UE-Lite，先运行 `capabilities`、`api` 确认可用命令。用 `catalog --kind` 和 `schema --kind module --asset` 获取实际资产标识及模块输入。先核对环境中的 `NIAGARA_LITE_PROJECT`，该变量优先于 `--workspace`。
-
-在技能根目录用 Python 3.10+ 将[示例模板](../assets/converging-beacon.json)转换成 `ue-niagara-recipe/1` 文件。转换器为模板中的引擎模块、类和材质补上 Unreal 对象标识所需的挂载语法。使用本机的 `niagara-cli`，为 `$asset` 输入目标环境下从内容浏览器复制的 Niagara System 包名，或为新 System 选定包名。命令失败时先处理返回错误，再执行下一步。
-
-```powershell
-$cli = (Get-Command niagara-cli -ErrorAction Stop).Source
-$work = './niagara-work'
-$recipe = './beacon.generated.json'
-$asset = Read-Host '目标 Niagara System 包名'
-python -B scripts/prepare_beacon_recipe.py $recipe
-& $cli --workspace $work init
-& $cli --workspace $work create --asset $asset --recipe $recipe
-& $cli --workspace $work compile --asset $asset
-& $cli --workspace $work save --asset $asset
-& $cli --workspace $work read --asset $asset --out (Join-Path $work 'beacon-read.json')
-```
-
-用返回的 `ok`、`compileValid` 和原生包回读核验。用 `edit` 时依据实际快照中的模块名或 GUID 定位改动。若版本支持离屏验证，可用 `cook --package` 打包，再对同一包用 `render --package` 采集多帧。核对相机、预热、粒子种子和图片。如需移动宿主，转到测试关卡采样。
+1. 在 Particle Spawn 用 Initialize Particle 设定固定寿命、颜色和 Sprite 尺寸。在初始化之后写入局部出生位置，并用 Add Velocity 给出固定方向和速度。
+2. 在 Particle Update 用 Particle State 按寿命回收粒子，让 Solve Forces and Velocity 更新位置。给每束添加一个 Sprite Renderer，选用可读取粒子颜色的材质并绑定位置、颜色与尺寸。如果从模板开始，移除会改变此处轨迹的随机初速度及额外受力模块。[UE 编辑器堆栈参考](https://dev.epicgames.com/documentation/unreal-engine/editor-ui-reference-for-niagara-effects-in-unreal-engine) · [粒子更新模块](https://dev.epicgames.com/documentation/unreal-engine/particle-update-group-reference-for-niagara-effects-in-unreal-engine)
+3. 编译并保存，在关卡预览两束光点从两侧向中心汇聚。固定速度下，寿命末端的设计位置为局部 X = 0 cm、Z = 72 cm。默认稳态估算为 2 × 15 × 0.6 = 18 粒，记录运行时峰值。
+4. 保持组件激活，将其 `User.EmissionRate` 改为 0，确认停止补点且约 0.6 s 后粒子回收。恢复为 15，确认两束都重新发射。
 
 ## 方法来源
 
